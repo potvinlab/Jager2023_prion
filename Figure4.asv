@@ -1,0 +1,246 @@
+%% Figure 4 
+%%
+%Experiments used
+data_dir = '/Users/laurent/Documents/data/prion_paper_final';
+load([data_dir '/Ch_expt1.mat'])
+
+load([data_dir '/Lh_colA_expt1.mat'])
+load([data_dir '/Lh_colA_expt2.mat'])
+load([data_dir '/Lh_colA_expt3.mat'])
+load([data_dir '/Lh_colA_expt4.mat'])
+
+load([data_dir '/Ch_ultra_R2.mat'])
+load([data_dir '/Ch_ultra_R3.mat'])
+load([data_dir '/Ch_ultra_R4.mat'])
+
+%%
+%Figure 4a - Same Lh colony
+startTime = 32;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_1,loss_curve_small_1] =prionLossDistrbution_LPT3(Lh_colA_expt1,0,0,startTime);
+startTime = 42;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_2,loss_curve_small_2] =prionLossDistrbution_LPT3(Lh_colA_expt3,0,0,startTime);
+startTime = 26;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_3,loss_curve_small_3] =prionLossDistrbution_LPT3(Lh_colA_expt4,0,0,startTime);
+startTime = 40;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_4,loss_curve_small_4] =prionLossDistrbution_LPT3(Lh_colA_expt2,0,0,startTime);
+
+frame_index = 0:(min([frame_index_small_1(end) frame_index_small_2(end) frame_index_small_3(end) frame_index_small_4(end)]));
+length_trace = length(frame_index);
+
+mean_loss_curve1 = mean([loss_curve_small_1(1:length_trace); ...
+                        loss_curve_small_2(1:length_trace); ...
+                        loss_curve_small_3(1:length_trace); ...
+                        loss_curve_small_4(1:length_trace)], 1);
+
+
+frame_index = frame_index *8/60;
+
+figure;p_mean1 = plot(frame_index,mean_loss_curve1,'-'); 
+
+hold on
+p_ind = plot(frame_index, loss_curve_small_1(1:length_trace),'linewidth',0.5,'Color',[0 0.4470 0.7410]);
+plot(frame_index, loss_curve_small_2(1:length_trace),'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index, loss_curve_small_3(1:length_trace),'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index, loss_curve_small_4(1:length_trace),'linewidth',0.5,'Color',[0 0.4470 0.7410])
+
+xlabel('Time (h)')
+ylabel('Fraction of cells in prion state')
+xlim([0 10])
+legend([p_mean1 p_ind],{'Mean of colony A','Diff. experiments A'}, 'location', 'best')
+%% ultra stable loss rate
+ultra_pool = pool_experiments({Ch_ultra_R2, Ch_ultra_R3, Ch_ultra_R4 }, [32 25 25]);
+1/(calc_loss_rate_per_frame(ultra_pool,1,0)/8*60)
+%%
+%Figure 4b - Stable Ch SSB lineage over time
+data = Ch_ultra_R2;
+startTime = 32;
+[lostTime,~,~,~,~,~,~, ~,~,~,frame_index_small,loss_curve_small] =prionLossDistrbution_LPT3(data,0,0,startTime);
+n = sum(lostTime>0)
+figure;plot(frame_index_small*8/60, loss_curve_small)
+hold on;
+
+std_bootstrap =bootstrap_it(100,12,@prionLossDistrbution_LPT3,data,0,0,startTime);
+mean_traces = loss_curve_small(1:length(std_bootstrap));
+x = frame_index_small*8/60;
+x=x(1:length(std_bootstrap));
+% Draw patch of shaded error bars, set color, transparency
+lo = mean_traces - std_bootstrap;
+hi = mean_traces + std_bootstrap;
+error = fill([x,fliplr(x)],[lo,fliplr(hi)],[0.7490 ,   0.6863  ,  0.8000],'HandleVisibility','off');
+set(error,'edgecolor','none','facealpha',0.2)
+
+
+
+
+data = Ch_ultra_R3;
+startTime = 25;
+[lostTime,~,~,~,~,~,~, ~,~,~,frame_index_small,loss_curve_small] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+
+
+n = sum(lostTime>0)
+
+plot(frame_index_small*8/60, loss_curve_small)
+
+std_bootstrap =bootstrap_it(100,12,@prionLossDistrbution_LPT3,data,0,0,startTime);
+mean_traces = loss_curve_small(1:length(std_bootstrap));
+x = frame_index_small*8/60;
+x=x(1:length(std_bootstrap));
+% Draw patch of shaded error bars, set color, transparency
+lo = mean_traces - 2*std_bootstrap;
+hi = mean_traces + 2*std_bootstrap;
+error = fill([x,fliplr(x)],[lo,fliplr(hi)],[0.7490 ,   0.6863  ,  0.8000],'HandleVisibility','off');
+set(error,'edgecolor','none','facealpha',0.2)
+
+data = Ch_ultra_R4;
+startTime = 25;
+[lostTime,~,~,~,~,~,~, ~,~,~,frame_index_small,loss_curve_small] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+n = sum(lostTime>0)
+
+plot(frame_index_small*8/60, loss_curve_small)
+
+std_bootstrap =bootstrap_it(100,12,@prionLossDistrbution_LPT3,data,0,0,startTime);
+mean_traces = loss_curve_small(1:length(std_bootstrap));
+x = frame_index_small*8/60;
+x=x(1:length(std_bootstrap));
+% Draw patch of shaded error bars, set color, transparency
+lo = mean_traces - 2*std_bootstrap;
+hi = mean_traces + 2*std_bootstrap;
+error = fill([x,fliplr(x)],[lo,fliplr(hi)],[0.7490 ,   0.6863  ,  0.8000],'HandleVisibility','off');
+set(error,'edgecolor','none','facealpha',0.2)
+
+data = Ch_expt1;
+startTime = 40;
+[lostTime,~,~,~,~,~,~, ~,~,~,frame_index_small,loss_curve_small] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+
+
+n = sum(lostTime>0)
+
+plot(frame_index_small*8/60, loss_curve_small)
+
+std_bootstrap =bootstrap_it(100,12,@prionLossDistrbution_LPT3,data,0,0,startTime);
+mean_traces = loss_curve_small(1:length(std_bootstrap));
+x = frame_index_small*8/60;
+x=x(1:length(std_bootstrap));
+% Draw patch of shaded error bars, set color, transparency
+lo = mean_traces - 2*std_bootstrap;
+hi = mean_traces + 2*std_bootstrap;
+error = fill([x,fliplr(x)],[lo,fliplr(hi)],[0.7490 ,   0.6863  ,  0.8000],'HandleVisibility','off');
+set(error,'edgecolor','none','facealpha',0.2)
+
+box off
+xlim([0 10])
+ylim([0 1])
+xlabel('Time (h)')
+ylabel('Fraction of cells with prions')
+box off
+legend('Round 1', 'Round 2','Round 3','Diff. lineage')
+
+%%
+%Figure 4c - Kymograph Ch SSBmutant
+dataCell = dataMM28_SSBmut2
+
+h1 = subplot(3,1,1)
+
+kym_image = [];
+
+for i = 1:length(dataCell.frameNo{282})
+
+    kym_image = cat(2,kym_image,dataCell.YFPImage{282}(i));
+
+end
+
+kym_image = kym_image(:,1:11:end)
+
+montage(kym_image, 'size', [1 20],'DisplayRange', [0 300],'ThumbnailSize', [80 30])
+
+ 
+h2 = subplot (3,1,2)
+
+kym_image = [];
+
+for i = 6:length(dataCell.frameNo{230})
+
+    kym_image = cat(2,kym_image,dataCell.YFPImage{230}(i));
+
+end
+
+kym_image = kym_image(:,1:11:end)
+
+montage(kym_image, 'size', [1 20],'DisplayRange', [0 300],'ThumbnailSize', [80 30])
+
+
+h3 = subplot (3,1,3)
+
+kym_image = [];
+
+for i = 4:length(dataCell.frameNo{104})
+
+    kym_image = cat(2,kym_image,dataCell.YFPImage{104}(i));
+
+end
+
+kym_image = kym_image(:,1:11:end)
+
+montage(kym_image, 'size', [1 20],'DisplayRange', [0 300],'ThumbnailSize', [80 30])
+
+
+colormap("hot") 
+
+%%
+%Figure 4d - Reproducibility Ch SSBmutant
+startTime = 40;
+data = data_mut_1;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_1,loss_curve_small_1] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+data = data_mut_2;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_2,loss_curve_small_2] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+data = data_mut_3;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_3,loss_curve_small_3] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+data = data_mut_4;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_4,loss_curve_small_4] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+data = data_mut_5;
+[~,~,~,~,~,~,~, ~,~,~,frame_index_small_5,loss_curve_small_5] =prionLossDistrbution_LPT3(data,0,0,startTime);
+
+
+length_index = [frame_index_small_1(end) frame_index_small_2(end) frame_index_small_3(end) frame_index_small_4(end) frame_index_small_5(end)];
+%average where we have at least 3 traces
+length_index = sort(length_index);
+
+
+frame_index = 0:(length_index(end-2)-1);
+length_trace = length(frame_index);
+loss_curve_matrix = nan(5,length_trace);
+loss_curve_matrix(1,1:length(loss_curve_small_1))=loss_curve_small_1;
+loss_curve_matrix(2,1:length(loss_curve_small_2))=loss_curve_small_2;
+loss_curve_matrix(3,1:length(loss_curve_small_3))=loss_curve_small_3;
+loss_curve_matrix(4,1:length(loss_curve_small_4))=loss_curve_small_4;
+loss_curve_matrix(5,1:length(loss_curve_small_5))=loss_curve_small_5;
+mean_loss_curve =nanmean(loss_curve_matrix,1);
+
+% mean_loss_curve = mean([loss_curve_small_1(1:length_trace); ...
+%                         loss_curve_small_2(1:length_trace); ...
+%                         loss_curve_small_3(1:length_trace); ...
+%                         loss_curve_small_4(1:length_trace); ...
+%                         loss_curve_small_5(1:length_trace);], 1);
+
+frame_index = frame_index *8/60;
+
+figure;plot(frame_index,mean_loss_curve(1:length_trace));
+
+hold on
+plot(frame_index_small_1*8/60, loss_curve_small_1,'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index_small_2*8/60, loss_curve_small_2,'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index_small_3*8/60, loss_curve_small_3,'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index_small_4*8/60, loss_curve_small_4,'linewidth',0.5,'Color',[0 0.4470 0.7410])
+plot(frame_index_small_5*8/60, loss_curve_small_5,'linewidth',0.5,'Color',[0 0.4470 0.7410])
+
+xlabel('Time (h)')
+ylabel('Fraction of cells in prion state')
+xlim ([0 10])
+legend({'Mean of all colonies','Individual colonies'})
